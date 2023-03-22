@@ -1,22 +1,20 @@
-#include <userver/components/minimal_server_component_list.hpp>
-#include <userver/clients/dns/component.hpp>
-#include <userver/clients/http/component.hpp>
-#include <userver/server/handlers/ping.hpp>
-#include <userver/server/handlers/tests_control.hpp>
-#include <userver/testsuite/testsuite_support.hpp>
 #include <userver/utils/daemon_run.hpp>
 
-#include "hello.hpp"
+#include <userver/components/component_list.hpp>
+#include <userver/logging/component.hpp>
+#include <userver/os_signals/component.hpp>
+#include <userver/components/tracer.hpp>
+#include <userver/components/manager_controller_component.hpp>
+
+#include "tcp_srv.hpp"
 
 int main(int argc, char* argv[]) {
-  auto component_list = userver::components::MinimalServerComponentList()
-                            .Append<userver::server::handlers::Ping>()
-                            .Append<userver::components::TestsuiteSupport>()
-                            .Append<userver::components::HttpClient>()
-                            .Append<userver::clients::dns::Component>()
-                            .Append<userver::server::handlers::TestsControl>();
-
-  service_template::AppendHello(component_list);
+  auto component_list = userver::components::ComponentList()
+                            .Append<userver::os_signals::ProcessorComponent>()
+                            .Append<userver::components::Logging>()       
+                            .Append<userver::components::Tracer>()                   
+                            // .Append<userver::components::ManagerControllerComponent>()
+                            .Append<c10kuserv::Srv>();
 
   return userver::utils::DaemonMain(argc, argv, component_list);
 }
