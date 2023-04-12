@@ -7,6 +7,10 @@
 #include <userver/components/manager_controller_component.hpp>
 
 #include "tcp_srv.hpp"
+#include "stats.hpp"
+
+#include <iostream>
+#include <thread>
 
 int main(int argc, char* argv[]) {
   auto component_list = userver::components::ComponentList()
@@ -16,5 +20,14 @@ int main(int argc, char* argv[]) {
                             // .Append<userver::components::ManagerControllerComponent>()
                             .Append<c10kuserv::Srv>();
 
+  auto stat_fun = []() {
+    while(true) {
+      std::cout << stats << std::endl;
+      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+  };
+
+  std::thread stat_t(stat_fun);
+  stat_t.detach();
   return userver::utils::DaemonMain(argc, argv, component_list);
 }
